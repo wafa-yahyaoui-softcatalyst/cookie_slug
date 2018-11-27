@@ -3,7 +3,10 @@ Base settings to build other settings files upon.
 """
 
 import environ
+import os
 
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 ROOT_DIR = environ.Path(__file__) - 3  # (cookie_slug/config/settings/base.py - 3 = cookie_slug/)
 APPS_DIR = ROOT_DIR.path('cookie_slug')
 
@@ -39,9 +42,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-    'default': env.db('DATABASE_URL', default='postgres:///cookie_slug'),
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
 }
-DATABASES['default']['ATOMIC_REQUESTS'] = True
 
 # URLS
 # ------------------------------------------------------------------------------
@@ -72,6 +77,8 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'cookie_slug.users.apps.UsersAppConfig',
     # Your stuff: custom apps go here
+    'blog',
+
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
