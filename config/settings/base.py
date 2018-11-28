@@ -12,7 +12,7 @@ APPS_DIR = ROOT_DIR.path('cookie_slug')
 
 env = environ.Env()
 
-READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=False)
+READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=True)
 if READ_DOT_ENV_FILE:
     # OS environment variables take precedence over variables from .env
     env.read_env(str(ROOT_DIR.path('.env')))
@@ -42,10 +42,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    'default': env.db('DATABASE_URL')
 }
 
 # URLS
@@ -77,7 +74,7 @@ THIRD_PARTY_APPS = [
 LOCAL_APPS = [
     'cookie_slug.users.apps.UsersAppConfig',
     # Your stuff: custom apps go here
-    'blog',
+    'cookie_slug.blog',
 
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
@@ -202,7 +199,7 @@ TEMPLATES = [
     },
 ]
 # http://django-crispy-forms.readthedocs.io/en/latest/install.html#template-packs
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
+CRISPY_TEMPLATE_PACK = 'uni_form'
 
 # FIXTURES
 # ------------------------------------------------------------------------------
@@ -225,7 +222,7 @@ X_FRAME_OPTIONS = 'DENY'
 # EMAIL
 # ------------------------------------------------------------------------------
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
-EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_BACKEND = env('DJANGO_EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
 
 # ADMIN
 # ------------------------------------------------------------------------------

@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.views import defaults as default_views
 
 urlpatterns = [
-    path("", include('blog.urls')),
+    path("", include('cookie_slug.blog.urls')),
     path(
         "about/",
         TemplateView.as_view(template_name="pages/about.html"),
