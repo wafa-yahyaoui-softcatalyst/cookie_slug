@@ -1,16 +1,50 @@
 {% extends 'blog/base.html' %}
 
 {% block content %}
-    <div class="post">
-        {% if post.published_date %}
-            <div class="date">
-                {{ post.published_date }}
-            </div>
-        {% endif %}
-        {% if user.is_authenticated %}
-     <a class="btn btn-default" href="{% url 'post_edit' pk=post.pk %}"><span class="glyphicon glyphicon-pencil"></span></a>
-{% endif %}
-        <h2>{{ object.title }}</h2>
-        <p>{{ object.text|linebreaksbr }}</p>
+  <div class="post">
+    {% if post.published_date %}
+      <div class="date">
+        {{ post.published_date }}
+      </div>
+    {% endif %}
+    {% if user.is_authenticated %}
+      <a class="btn btn-default btn-lg" data-toggle="modal" data-target="#myModal"><span
+        class="glyphicon glyphicon-pencil"></span></a>
+    {% endif %}
+    <h2 id ="post_title"></h2>
+    <p id ="post_text"></p>
+  </div>
+
+  <div class="container">
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" role="dialog">
+      <div class="modal-dialog">
+
+        <!-- Modal content-->
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Update Post</h4>
+          </div>
+          <div class="modal-body">
+            <form method="POST" action="#" id="FormUpdatePost" name="FormUpdatePostName">{% csrf_token %}
+              {{ form.as_p }}
+              <div class="modal-footer">
+                <input type="submit" value="Post" class="btn btn-success" >
+                <span><button type="button" class="btn btn-default" data-dismiss="modal" id="ModalDismissButton">Close</button></span>
+              </div>
+            </form>
+          </div>
+
+
+        </div>
+
+      </div>
     </div>
+
+  </div>
+
+
+
+
 {% endblock %}
