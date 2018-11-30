@@ -10,6 +10,15 @@ class Post(models.Model):
     created_date = models.DateTimeField(default=timezone.now)
     published_date = models.DateTimeField(blank=True, null=True)
 
+    def as_json(self):
+        return dict(
+            author=self.author,
+            title=self.title,
+            text=self.text,
+            pk=self.pk,
+            created_date=self.created_date,
+            published_date=self.published_date)
+
     def publish(self):
         self.published_date = timezone.now()
         self.save()

@@ -60,7 +60,8 @@ $(function () {
 // A $( document ).ready() block.
 $(document).ready(function () {
     console.log("ready!");
-    display_post();
+    //display_post();
+    display_list_posts();
     // Submit post on submit
     $("#FormUpdatePost").on('submit', function (event) {
         event.preventDefault();
@@ -73,9 +74,8 @@ $(document).ready(function () {
 // AJAX for displaying post
  function display_post() {
         console.log("create post is working!") // sanity check
-
-        var post = window.location.pathname.split("/")[2]
-        var url_action = "/post/".concat(post, "/edit/ajax/")
+        var pk = window.location.pathname.split("/")[2]
+        var url_action = "/post/".concat(pk, "/edit/ajax/")
 
         $.ajax({
             url: url_action, // the endpoint
@@ -128,10 +128,77 @@ $(document).ready(function () {
         });
     };
 
-setInterval(display_post, 2000);
+
+    // AJAX for displaying  list of posts
+ function display_list_posts() {
+        console.log("display list of posts is working!") // sanity check
+        $.ajax({
+            url: '/', // the endpoint
+            type: "GET", // http method
+            dataType: "json",
+
+            // handle a successful response
+            success: function (json) {
+                var posts = []
+                json.forEach(function (post) {
+                    var post_bloc = "<div class='post'><div class='date'>".concat(post.published_date,
+                         "</div><h2><a href= '/post/",
+                        post.pk,
+                        "'>",
+                        post.title,
+                         "</a></h2 ><a class='btn btn-default btn-lg' onclick='ClickButtonDelete(this);' data-toggle='modal'  data-target='#DeleteModal' name='",
+                        post.pk,
+                        "'><span class='glyphicon glyphicon-remove'></span></a><p>",
+                        post.text,
+                        "</p>")
+
+                    posts.push(post_bloc)
+
+                })
+                $("#PostsList").html(posts)
+                console.log("success"); // another sanity check
+            },
+
+            // handle a non-successful response
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    };
+
+ // AJAX for deleting a post
+
+
+     $("#ModalDeleteButton").click(function(){
+         console.log($("#DeleteButton"))
+         console.log($('input[name="csrfmiddlewaretoken"]').attr('value'))
+
+        $.ajax({
+            url: "/post/delete/".concat(this.name, "/"), // the endpoint
+            type: "POST", // http method
+            data:{pk:this.name,
+            csrfmiddlewaretoken : $('input[name="csrfmiddlewaretoken"]').attr('value')},
+            // handle a successful response
+            success: function (json) {
+                console.log(json)
+                console.log("success"); // another sanity check
+                display_list_posts();
+            },
+
+            // handle a non-successful response
+            error: function (xhr, errmsg, err) {
+                console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+            }
+        });
+    });
+
+
+//setInterval(display_post, 2000);
 });
 
-
-
+ function ClickButtonDelete(element) {
+         console.log("clicked")
+     console.log(element.name)
+    $("#ModalDeleteButton").attr("name",element.name)}
 
 

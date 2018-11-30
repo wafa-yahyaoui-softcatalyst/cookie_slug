@@ -2,18 +2,29 @@ from django.utils import timezone
 from django.core.mail import send_mail
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.views.generic.edit import CreateView, UpdateView, FormView
+from django.views.generic.edit import CreateView, UpdateView, FormView, DeleteView
 from django.shortcuts import get_object_or_404, redirect
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.core import serializers
+from django.http import HttpResponse
+import json
 from .models import Post
 from .forms import PostForm, FeedbackForm
+from django.views.generic import View
 
 
 class PostListView(ListView):
     model = Post
     template_name = 'blog/post_list.html'
+
+    def get(self, request, *args, **kwargs):
+        if self.request.is_ajax():
+            results = [ob.as_json() for ob in Post.objects.all()]
+            return HttpResponse(json.dumps(results, indent=4, sort_keys=True, default=str),
+                                content_type="application/json")
+
+        return super(PostListView, self).get(request, *args, **kwargs)
 
 
 class PostDetailView(DetailView):
@@ -50,10 +61,27 @@ class PostUpdate(UpdateView):
 
     def get(self, request, *args, **kwargs):
         if self.request.is_ajax():
-            return JsonResponse({'title': self.get_object().title,
-                                 'text': self.get_object().text})
+            my_object = self.get_object()
+            return JsonResponse({'title': my_object.title,
+                                 'text': my_object.text})
 
         return super(PostUpdate, self).get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        response = super(PostUpdate, self).post(request, *args, **kwargs)
+        if self.request.is_ajax():
+            return JsonResponse({'message': 'success'})
+        return response
+
+
+class PostDelete(View):
+
+    def post(self, request, *args, **kwargs):
+        response = super(PostDelete, self).__init__(*args, **kwargs)
+        if self.request.is_ajax():
+            Post.objects.get(pk=request.POST['pk']).delete()
+            return JsonResponse({'message': 'success'})
+        return response
 
 
 class Feedback(FormView):
@@ -72,18 +100,3 @@ class Feedback(FormView):
         )
 
         return super(Feedback, self).form_valid(form)
-
-
-def post_edit(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-
-    if request.method == "POST":
-        form = PostForm(request.POST, instance=post)
-        if form.is_valid():
-            post = form.save()
-            return redirect('post_detail', pk=post.pk)
-    else:
-        form = PostForm(instance=post)
-    return render(request, 'blog/post_edit.html', {'form': form})
-
-# AJAX with class based views
